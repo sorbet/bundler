@@ -1,4 +1,3 @@
-require "set"
 require_relative "thor/base"
 
 class Bundler::Thor
@@ -323,7 +322,7 @@ class Bundler::Thor
     # ==== Parameters
     # Symbol ...:: A list of commands that should be affected.
     def stop_on_unknown_option!(*command_names)
-      stop_on_unknown_option.merge(command_names)
+      command_names.each { |k| stop_on_unknown_option[k] = true }
     end
 
     def stop_on_unknown_option?(command) #:nodoc:
@@ -337,11 +336,11 @@ class Bundler::Thor
     # ==== Parameters
     # Symbol ...:: A list of commands that should be affected.
     def disable_required_check!(*command_names)
-      disable_required_check.merge(command_names)
+      command_names.each { |k| disable_required_check[k] = true }
     end
 
     def disable_required_check?(command) #:nodoc:
-      command && disable_required_check.include?(command.name.to_sym)
+      command && disable_required_check[command.name.to_sym]
     end
 
     def deprecation_warning(message) #:nodoc:
@@ -354,12 +353,16 @@ class Bundler::Thor
   protected
 
     def stop_on_unknown_option #:nodoc:
-      @stop_on_unknown_option ||= Set.new
+      @stop_on_unknown_option ||= Hash.new(false)
     end
 
     # help command has the required check disabled by default.
     def disable_required_check #:nodoc:
-      @disable_required_check ||= Set.new([:help])
+      if not @disable_required_check
+        @disable_required_check = Hash.new(false)
+        @disable_required_check[:help] = true
+      end
+      @disable_required_check
     end
 
     # The method responsible for dispatching given the args.

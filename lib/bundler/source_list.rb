@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module Bundler
   class SourceList
     attr_reader :path_sources,
@@ -99,7 +97,10 @@ module Bundler
       @rubygems_aggregate = replacement_rubygems if replacement_rubygems
 
       return true if !equal_sources?(lock_sources, replacement_sources) && !equivalent_sources?(lock_sources, replacement_sources)
-      return true if replacement_rubygems && rubygems_remotes.to_set != replacement_rubygems.remotes.to_set
+      return false if !replacement_rubygems
+      rubygems_h = rubygems_remotes.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+      replacement_h = replacement_rubygems.remotes.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+      return true if rubygems_h != replacement_h
 
       false
     end
@@ -153,7 +154,10 @@ module Bundler
     end
 
     def equal_sources?(lock_sources, replacement_sources)
-      lock_sources.to_set == replacement_sources.to_set
+      # lock_sources.to_set == replacement_sources.to_set
+      lock_sources_h = lock_sources.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+      replacement_sources_h = replacement_sources.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+      lock_sources_h == replacement_sources_h
     end
 
     def equal_source?(source, other_source)

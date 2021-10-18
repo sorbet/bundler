@@ -16,7 +16,9 @@ module Bundler
     # <GemBundle>,nil:: If the list of dependencies can be resolved, a
     #   collection of gemspecs is returned. Otherwise, nil is returned.
     def self.resolve(requirements, index, source_requirements = {}, base = [], gem_version_promoter = GemVersionPromoter.new, additional_base_requirements = [], platforms = nil)
-      platforms = Set.new(platforms) if platforms
+      if platforms
+        platforms = platforms.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+      end
       base = SpecSet.new(base) unless base.is_a?(SpecSet)
       resolver = new(index, source_requirements, base, gem_version_promoter, additional_base_requirements, platforms)
       result = resolver.start(requirements)
@@ -184,7 +186,7 @@ module Bundler
 
     def requirement_satisfied_by?(requirement, activated, spec)
       return false unless requirement.matches_spec?(spec) || spec.source.is_a?(Source::Gemspec)
-      spec.activate_platform!(requirement.__platform) if !@platforms || @platforms.include?(requirement.__platform)
+      spec.activate_platform!(requirement.__platform) if !@platforms || @platforms[requirement.__platform]
       true
     end
 

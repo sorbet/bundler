@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative "lockfile_parser"
-require "set"
 
 module Bundler
   class Definition
@@ -589,7 +588,9 @@ module Bundler
       deps_for_source = @dependencies.select {|s| s.source == source }
       locked_deps_for_source = @locked_deps.values.select {|dep| dep.source == locked_source }
 
-      Set.new(deps_for_source) != Set.new(locked_deps_for_source)
+      deps_h = deps_for_source.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+      locked_deps_h = locked_deps_for_source.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+      deps_h != locked_deps_h
     end
 
     def specs_for_source_changed?(source)

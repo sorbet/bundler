@@ -59,7 +59,9 @@ module Bundler::Molinillo
       # @param [Set<Vertex>] vertices the set to add the predecessors to
       # @return [Set<Vertex>] the vertices of {#graph} where `self` is a
       #   {#descendent?}
-      def _recursive_predecessors(vertices = Set.new)
+      def _recursive_predecessors(vertices = nil)
+        require 'set'
+        vertices ||= Set.new
         incoming_edges.each do |edge|
           vertex = edge.origin
           next unless vertices.add?(vertex)
@@ -85,7 +87,9 @@ module Bundler::Molinillo
       # @param [Set<Vertex>] vertices the set to add the successors to
       # @return [Set<Vertex>] the vertices of {#graph} where `self` is an
       #   {#ancestor?}
-      def _recursive_successors(vertices = Set.new)
+      def _recursive_successors(vertices = nil)
+        require 'set'
+        vertices ||= Set.new
         outgoing_edges.each do |edge|
           vertex = edge.destination
           next unless vertices.add?(vertex)
@@ -138,7 +142,9 @@ module Bundler::Molinillo
       # @param [Vertex] other the vertex to check if there's a path to
       # @param [Set<Vertex>] visited the vertices of {#graph} that have been visited
       # @return [Boolean] whether there is a path to `other` from `self`
-      def _path_to?(other, visited = Set.new)
+      def _path_to?(other, visited = nil)
+        require 'set'
+        visited ||= Set.new
         return false unless visited.add?(self)
         return true if equal?(other)
         successors.any? { |v| v._path_to?(other, visited) }

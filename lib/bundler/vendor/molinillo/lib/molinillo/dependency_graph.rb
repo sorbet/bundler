@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'set'
 require 'tsort'
 
 require_relative 'dependency_graph/log'
@@ -134,7 +133,9 @@ module Bundler::Molinillo
         other_vertex = other.vertex_named(name)
         return false unless other_vertex
         return false unless vertex.payload == other_vertex.payload
-        return false unless other_vertex.successors.to_set == vertex.successors.to_set
+        succs = vertex.successors.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+        other_succs = other_vertex.successors.each_with_object(Hash.new(false)) { |v, h| h[v] = true }
+        return false unless succs == other_succs
       end
     end
 
